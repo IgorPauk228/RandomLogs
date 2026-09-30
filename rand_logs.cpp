@@ -461,6 +461,72 @@ void create_plot(const std::string& filename){
     fin.close();
 }
 
+void create_user_plot(const std::string& filename, uint32_t id){
+    if (id > 99 && id == 0){
+        std::cout << "Wrong id" << '\n';
+        return;
+    }
+
+
+    std::cout << "Periods of user" << id << " activity:\n";
+    std::cout << '\n';
+
+    std::ifstream fin(filename);
+    if (!fin.is_open()) {
+        std::cerr << "Не удалось открыть файл: " << filename.c_str() << "\n";
+        return;
+    }
+    
+    int32_t active_logs[12]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    std::string line;
+    std::string dt_line;
+    Date dt;
+    
+    while(std::getline(fin, line)){
+        if (std::stoi(line.substr(4, 2)) != id){
+            continue;
+        }
+        dt_line = line.substr(22, line.length() - 22);
+        str_date_to_struct(dt_line, dt);
+        ++active_logs[(dt.year - 1960) / 5];
+    }
+
+    int32_t max = active_logs[0];
+    for (uint32_t i = 1; i < 12; ++i){
+        if (active_logs[i] >  max) max = active_logs[i];
+    }
+
+    for (int32_t i = 0; i <= 15; ++i){
+        std::cout << std::setw(3) << max - i * (max / 12) << " | ";
+        for (int32_t j = 0; j < 12; ++j){
+            if (active_logs[j] > max - i * (max / 12) && active_logs[j] < max - (i - 1) * (max / 12)){
+                std::cout << "  *****";
+            }
+            else{
+                std::cout << "       ";
+            }
+        }
+        std::cout << '\n';
+    }
+    for (uint32_t i = 0; i < 93; ++i){
+        std::cout << '_';
+    }
+
+    std::cout << '\n';
+
+    uint32_t year = 1960;
+    std::cout << "      ";
+    for (;year < 2020; year += 5){
+        std::cout << std::setw(7) << year;
+    }
+
+    std::cout << '\n';
+    std::cout << '\n';
+
+    fin.close();
+
+}
 
 int main(){
     srand(time(0));
